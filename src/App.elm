@@ -16,6 +16,10 @@ type alias Model =
     , users: List User
     }
 type Msg = Initialize | Increment | Decrement | Reset | Duplicate
+            | DeleteUser User
+-- Kako bolje naredit tole
+--             | EditUserMsg Edit
+-- type EditUser = Delete User | IncrPoints User | DecrPoints User
 
 initialModel : () -> (Model, Cmd Msg)
 initialModel () = ({value = 0, numberOfClicks = 0, users = initialUsers}, Cmd.none)
@@ -39,7 +43,7 @@ view model =
         [Html.text "Duplicate"]
     , Button.button
         [Button.danger, Button.onClick Reset]
-        [Html.text "Clear"]
+        [Html.text "Reset"]
 
     , Grid.row []
         [ Grid.col [] [Html.text "UID"]
@@ -47,11 +51,15 @@ view model =
         , Grid.col [] [Html.text "Točke"]
         ]
     ] ++ (
-        List.map (\user -> Grid.row []
-                            [ Grid.col [] [Html.text (String.fromInt user.uid)]
-                            , Grid.col [] [Html.text user.name]
-                            , Grid.col [] [Html.text (String.fromInt user.points)]
-                            ]) model.users
+        model.users
+        |> List.sortBy .points
+        |> List.reverse
+        |> List.map (\usr -> Grid.row []
+                                [ Grid.col [] [Html.text (String.fromInt usr.uid)]
+                                , Grid.col [] [Html.text usr.name]
+                                , Grid.col [] [Html.text (String.fromInt usr.points)]
+                                , Grid.col [] [Button.button [Button.onClick (DeleteUser usr)] [Html.text "X"]]
+                                ])
     )
     )
 
@@ -65,6 +73,7 @@ update msg model =
         Duplicate -> ({model | value = model.value * 2,
                        numberOfClicks = model.numberOfClicks + 1}, Cmd.none)
         Reset -> initialModel ()
+        DeleteUser usr -> ({model | users = List.filter (\user -> usr.uid /= user.uid) model.users}, Cmd.none)
         _ -> (model, Cmd.none)
 
 main : Program () Model Msg

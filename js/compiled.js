@@ -5162,6 +5162,18 @@ var $author$project$App$initialModel = function (_v0) {
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$App$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -5185,11 +5197,28 @@ var $author$project$App$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'Reset':
 				return $author$project$App$initialModel(_Utils_Tuple0);
+			case 'DeleteUser':
+				var usr = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							users: A2(
+								$elm$core$List$filter,
+								function (user) {
+									return !_Utils_eq(usr.uid, user.uid);
+								},
+								model.users)
+						}),
+					$elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$App$Decrement = {$: 'Decrement'};
+var $author$project$App$DeleteUser = function (a) {
+	return {$: 'DeleteUser', a: a};
+};
 var $author$project$App$Duplicate = {$: 'Duplicate'};
 var $author$project$App$Increment = {$: 'Increment'};
 var $author$project$App$Reset = {$: 'Reset'};
@@ -5247,17 +5276,6 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
@@ -6265,6 +6283,7 @@ var $rundis$elm_bootstrap$Bootstrap$Grid$row = F2(
 			$rundis$elm_bootstrap$Bootstrap$Grid$Internal$rowAttributes(options),
 			A2($elm$core$List$map, $rundis$elm_bootstrap$Bootstrap$Grid$renderCol, cols));
 	});
+var $elm$core$List$sortBy = _List_sortBy;
 var $rundis$elm_bootstrap$Bootstrap$Internal$Button$Success = {$: 'Success'};
 var $rundis$elm_bootstrap$Bootstrap$Button$success = $rundis$elm_bootstrap$Bootstrap$Internal$Button$Coloring(
 	$rundis$elm_bootstrap$Bootstrap$Internal$Button$Roled($rundis$elm_bootstrap$Bootstrap$Internal$Button$Success));
@@ -6344,7 +6363,7 @@ var $author$project$App$view = function (model) {
 						]),
 					_List_fromArray(
 						[
-							$elm$html$Html$text('Clear')
+							$elm$html$Html$text('Reset')
 						])),
 					A2(
 					$rundis$elm_bootstrap$Bootstrap$Grid$row,
@@ -6376,7 +6395,7 @@ var $author$project$App$view = function (model) {
 				]),
 			A2(
 				$elm$core$List$map,
-				function (user) {
+				function (usr) {
 					return A2(
 						$rundis$elm_bootstrap$Bootstrap$Grid$row,
 						_List_Nil,
@@ -6388,14 +6407,14 @@ var $author$project$App$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$text(
-										$elm$core$String$fromInt(user.uid))
+										$elm$core$String$fromInt(usr.uid))
 									])),
 								A2(
 								$rundis$elm_bootstrap$Bootstrap$Grid$col,
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text(user.name)
+										$elm$html$Html$text(usr.name)
 									])),
 								A2(
 								$rundis$elm_bootstrap$Bootstrap$Grid$col,
@@ -6403,11 +6422,34 @@ var $author$project$App$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$text(
-										$elm$core$String$fromInt(user.points))
+										$elm$core$String$fromInt(usr.points))
+									])),
+								A2(
+								$rundis$elm_bootstrap$Bootstrap$Grid$col,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$rundis$elm_bootstrap$Bootstrap$Button$button,
+										_List_fromArray(
+											[
+												$rundis$elm_bootstrap$Bootstrap$Button$onClick(
+												$author$project$App$DeleteUser(usr))
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('X')
+											]))
 									]))
 							]));
 				},
-				model.users)));
+				$elm$core$List$reverse(
+					A2(
+						$elm$core$List$sortBy,
+						function ($) {
+							return $.points;
+						},
+						model.users)))));
 };
 var $author$project$App$main = $elm$browser$Browser$element(
 	{
